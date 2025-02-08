@@ -1,13 +1,22 @@
 const http = require("http")
 const path = require("path")
 const fs = require("fs")
+const url = require("url")//манипулювати посиланнями
 
 let server = http.createServer((req, res)=>{
     if(req.url == "/jokes" && req.method == "GET"){
         getAllJokes(req,res)
-    }else if(req.url == "/jokes" && req.method =="POST"){
+    }
+    else if(req.url == "/jokes" && req.method =="POST"){
         addNewJoke(req,res)
-    }else{
+    }
+    else if(req.url.startsWith("/like") && req.method =="GET"){
+        likePost(req, res)
+    }
+    else if(req.url.startsWith("/dislike") && req.method =="GET"){
+        disPost(req, res)
+    }
+    else{
         res.writeHead(404, {"content-type": "text/plain"})
         res.end("404 not found")
     }
@@ -51,3 +60,34 @@ function addNewJoke(req,res){
     })
 }
 
+function likePost(req, res){
+    let params=url.parse(req.url, true).query
+    console.log(params)
+    let pathToJoke = path.join(__dirname, "static", "data", params.id + ".json")
+    let joke= fs.readFileSync(pathToJoke)
+    joke= Buffer.from(joke).toString()
+    joke= JSON.parse(joke)
+
+    joke.likes++
+
+    joke = JSON.stringify(joke)
+    fs.writeFileSync(pathToJoke, joke)//(куда записуємо, що записуємо)
+
+    res.end(joke)
+}
+function disPost(req, res){
+    let params=url.parse(req.url, true).query
+    console.log(params)
+    let pathToJoke = path.join(__dirname, "static", "data", params.id + ".json")
+    let joke= fs.readFileSync(pathToJoke)
+    joke= Buffer.from(joke).toString()
+    joke= JSON.parse(joke)
+
+    joke.dislike++
+
+    joke = JSON.stringify(joke)
+    fs.writeFileSync(pathToJoke, joke)//(куда записуємо, що записуємо)
+
+    res.end(joke)
+
+}
