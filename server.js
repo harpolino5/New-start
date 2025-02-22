@@ -4,6 +4,7 @@ const fs = require("fs")
 const url = require("url")//манипулювати посиланнями
 
 let server = http.createServer((req, res)=>{
+    res.setHeader("Access-Control-Allow-Origin", "*")
     if(req.url == "/jokes" && req.method == "GET"){
         getAllJokes(req,res)
     }
